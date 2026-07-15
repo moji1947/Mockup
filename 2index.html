@@ -421,11 +421,11 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
 }
 
 // ─── PROJECT CARD ─────────────────────────────────────────────────────────────
-function ProjectCard({ project, onClick }: { project: Project; onClick: () => void }) {
+function ProjectCard({ project, onClick }: { project: Project; onClick: (id: string) => void }) {
   const edgeColor = STATUS_EDGE[project.status];
   const circ = 2 * Math.PI * 17;
   return (
-    <div onClick={onClick}
+    <div onClick={() => onClick(project.id)}
       className="bg-white rounded-2xl shadow-sm border border-[#E5E7EB] overflow-hidden cursor-pointer hover:shadow-md transition-all hover:-translate-y-0.5"
       style={{ borderLeft: `4px solid ${edgeColor}` }}>
       <div className="p-4">
@@ -470,7 +470,7 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
 }
 
 // ─── MAP ──────────────────────────────────────────────────────────────────────
-function ThailandMap({ projects, onSelect }: { projects: Project[]; onSelect: () => void }) {
+function ThailandMap({ projects, onSelect }: { projects: Project[]; onSelect: (id: string) => void }) {
   const [hovered, setHovered] = useState<string | null>(null);
   return (
     <div className="relative w-full rounded-xl overflow-hidden"
@@ -493,7 +493,7 @@ function ThailandMap({ projects, onSelect }: { projects: Project[]; onSelect: ()
             style={{ position: "absolute", left: `${p.mapX}%`, top: `${p.mapY}%`, transform: "translate(-50%,-100%)", zIndex: isHov ? 20 : 10 }}
             onMouseEnter={() => setHovered(p.id)}
             onMouseLeave={() => setHovered(null)}
-            onClick={onSelect}
+            onClick={() => onSelect(p.id)}
             className="cursor-pointer">
             {isHov && (
               <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-lg border border-[#E5E7EB] px-3 py-2 whitespace-nowrap pointer-events-none">
@@ -525,7 +525,7 @@ function ThailandMap({ projects, onSelect }: { projects: Project[]; onSelect: ()
 }
 
 // ─── PORTFOLIO PAGE ───────────────────────────────────────────────────────────
-function PortfolioPage({ onOpenProject }: { onOpenProject: () => void }) {
+function PortfolioPage({ onOpenProject }: { onOpenProject: (id: string) => void }) {
   const [filter, setFilter] = useState("All");
   const filtered = PROJECTS.filter(p => {
     if (filter === "All") return true;
@@ -665,8 +665,7 @@ const NAV_ITEMS: Array<{ id: NavPage; icon: React.ReactNode; label: string; labe
   { id: "documents", icon: <FileText size={15} />,    label: "เอกสาร",       labelEn: "Documents"               },
 ];
 
-function Sidebar({ active, onChange, onBack }: { active: NavPage; onChange: (p: NavPage) => void; onBack: () => void }) {
-  const project = PROJECTS[0];
+function Sidebar({ project, active, onChange, onBack }: { project: Project; active: NavPage; onChange: (p: NavPage) => void; onBack: () => void }) {
   return (
     <div className="w-[240px] bg-[#1A202C] border-r border-[#1A202C] flex flex-col h-full flex-shrink-0">
       <div className="p-4 border-b border-white/10">
@@ -728,8 +727,7 @@ const PAGE_LABELS: Record<NavPage, string> = {
   photos: "รูปภาพ · Site Photos", documents: "เอกสาร · Documents",
 };
 
-function TopBar({ navPage }: { navPage: NavPage }) {
-  const project = PROJECTS[0];
+function TopBar({ project, navPage }: { project: Project; navPage: NavPage }) {
   return (
     <div className="bg-white border-b border-[#E5E7EB] px-5 py-2.5 flex items-center justify-between flex-shrink-0">
       <div className="flex items-center gap-1.5 text-[12px] text-[#6B7280]">
@@ -759,7 +757,7 @@ function TopBar({ navPage }: { navPage: NavPage }) {
 }
 
 // ─── QUALITY PAGE ─────────────────────────────────────────────────────────────
-function QualityPage() {
+function QualityPage({ project }: { project: Project }) {
   const ncrByDisc = [
     { name: "Civil", closed: 28, open: 12 },
     { name: "Mechanical", closed: 15, open: 8 },
@@ -798,11 +796,11 @@ function QualityPage() {
           <div className="flex gap-5">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <span style={{ fontFamily: "'IBM Plex Mono',monospace" }} className="text-[11px] text-[#6B7280] bg-[#F3F4F6] px-2 py-0.5 rounded-lg">{PROJECTS[0].id}</span>
-                <StatusPill status="at-risk" />
+                <span style={{ fontFamily: "'IBM Plex Mono',monospace" }} className="text-[11px] text-[#6B7280] bg-[#F3F4F6] px-2 py-0.5 rounded-lg">{project.id}</span>
+                <StatusPill status={project.status} />
               </div>
-              <div className="text-[18px] font-bold text-[#111827] leading-tight mb-1.5">{PROJECTS[0].nameTh} · {PROJECTS[0].location}</div>
-              <div className="text-[12px] text-[#6B7280] mb-3">เจ้าของ: {PROJECTS[0].owner} · ผู้รับเหมา: ThaiBuild Co. · ที่ปรึกษา: EPS Engineering · Phase 2 EPC</div>
+              <div className="text-[18px] font-bold text-[#111827] leading-tight mb-1.5">{project.nameTh} · {project.location}</div>
+              <div className="text-[12px] text-[#6B7280] mb-3">เจ้าของ: {project.owner} · ผู้รับเหมา: ThaiBuild Co. · ที่ปรึกษา: EPS Engineering · Phase 2 EPC</div>
               <div className="flex gap-2 flex-wrap">
                 <span className="bg-[#F0F9FF] text-[#0284C7] text-[11px] font-semibold px-2 py-0.5 rounded-full">EPC Phase 2</span>
                 <span className="bg-[#F3F4F6] text-[#4B5563] text-[11px] font-semibold px-2 py-0.5 rounded-full">Fixed Price Contract</span>
@@ -1257,7 +1255,7 @@ function DeliveryPage() {
 }
 
 // ─── PHOTOS PAGE ──────────────────────────────────────────────────────────────
-function PhotosPage() {
+function PhotosPage({ project }: { project: Project }) {
   const [activeFilter, setActiveFilter] = useState("All");
   const [uploadCount, setUploadCount] = useState(0);
 
@@ -1295,7 +1293,7 @@ function PhotosPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="text-[22px] font-bold text-[#111827]">รูปภาพงานก่อสร้าง · Site Photos</div>
-          <div className="text-[13px] text-[#6B7280]">{PROJECTS[0].id} · {PROJECTS[0].nameTh}</div>
+          <div className="text-[13px] text-[#6B7280]">{project.id} · {project.nameTh}</div>
         </div>
         <div className="flex items-center gap-2">
           <span className="bg-[#F3F4F6] text-[#4B5563] text-[12px] font-semibold px-3 py-1 rounded-full border border-[#E5E7EB]">
@@ -1390,23 +1388,23 @@ function DocumentsPage() {
 }
 
 // ─── DASHBOARD SHELL ─────────────────────────────────────────────────────────
-function DashboardShell({ onBack }: { onBack: () => void }) {
+function DashboardShell({ project, onBack }: { project: Project; onBack: () => void }) {
   const [navPage, setNavPage] = useState<NavPage>("quality");
 
   return (
     <div className="flex h-screen bg-[#F3F4F6] overflow-hidden">
-      <Sidebar active={navPage} onChange={setNavPage} onBack={onBack} />
+      <Sidebar project={project} active={navPage} onChange={setNavPage} onBack={onBack} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <TopBar navPage={navPage} />
+        <TopBar project={project} navPage={navPage} />
         <main className="flex-1 overflow-y-auto p-5 scrollbar-thin">
           <InfoBanner
             text="ข้อมูลซิงค์จากระบบ DMS Document Control — อัพเดททุก 15 นาที"
-            sub={`Data source: EPS Document Management System · Auto-sync every 15 min · Last synced 09:14 · Project: ${PROJECTS[0].id}`}
+            sub={`Data source: EPS Document Management System · Auto-sync every 15 min · Last synced 09:14 · Project: ${project.id}`}
           />
-          {navPage === "quality"   && <QualityPage />}
+          {navPage === "quality"   && <QualityPage project={project} />}
           {navPage === "cost"      && <CostPage />}
           {navPage === "delivery"  && <DeliveryPage />}
-          {navPage === "photos"    && <PhotosPage />}
+          {navPage === "photos"    && <PhotosPage project={project} />}
           {navPage === "documents" && <DocumentsPage />}
         </main>
       </div>
@@ -1417,8 +1415,16 @@ function DashboardShell({ onBack }: { onBack: () => void }) {
 // ─── APP ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [page, setPage] = useState<AppPage>("login");
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(PROJECTS[0].id);
+
+  const openProject = (id: string) => {
+    setSelectedProjectId(id);
+    setPage("dashboard");
+  };
 
   if (page === "login")     return <LoginPage onLogin={() => setPage("portfolio")} />;
-  if (page === "portfolio") return <PortfolioPage onOpenProject={() => setPage("dashboard")} />;
-  return <DashboardShell onBack={() => setPage("portfolio")} />;
+  if (page === "portfolio") return <PortfolioPage onOpenProject={openProject} />;
+
+  const selectedProject = PROJECTS.find(p => p.id === selectedProjectId) ?? PROJECTS[0];
+  return <DashboardShell project={selectedProject} onBack={() => setPage("portfolio")} />;
 }
